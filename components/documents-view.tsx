@@ -1,11 +1,9 @@
 "use client";
 
 import {
-  Calendar,
   ExternalLink,
   FileText,
   Filter,
-  Layers3,
   MoreHorizontal,
   Search,
   Trash2,
@@ -38,7 +36,6 @@ export function DocumentsView() {
   const [dragging, setDragging] = useState(false);
   const [notice, setNotice] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [selected, setSelected] = useState<DocumentRow | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const visible = docs.filter(document =>
@@ -115,10 +112,6 @@ export function DocumentsView() {
 
   function openDetails(document: DocumentRow) {
     setMenuId(null);
-    if (document.previewUrl) {
-      setSelected(document);
-      return;
-    }
     window.location.assign(`/dashboard/documents/${document.id}`);
   }
 
@@ -127,7 +120,6 @@ export function DocumentsView() {
     if (document.previewUrl) void deleteStoredDocument(document.id);
     setDocs(current => current.filter(item => item.id !== document.id));
     setMenuId(null);
-    setSelected(current => current?.id === document.id ? null : current);
   }
 
   return <main className="dashboard-page">
@@ -154,9 +146,7 @@ export function DocumentsView() {
       <div className="data-table" role="table" aria-label="Documents">
         <div className="table-head" role="row"><span>DOCUMENT</span><span>STATUS</span><span>PAGES</span><span>CHUNKS</span><span>UPLOADED</span><span><span className="sr-only">Actions</span></span></div>
         {visible.map(document => <div className="table-row" role="row" key={document.id}>
-          {document.previewUrl
-            ? <button className="table-document table-document-button" onClick={() => openDetails(document)}><DocumentIdentity document={document}/></button>
-            : <Link href={`/dashboard/documents/${document.id}`} className="table-document"><DocumentIdentity document={document}/></Link>}
+          <Link href={`/dashboard/documents/${document.id}`} className="table-document"><DocumentIdentity document={document}/></Link>
           <span><StatusPill status={document.status}/></span>
           <span data-label="Pages">{document.pages || "—"}</span>
           <span data-label="Chunks">{document.chunks || "—"}</span>
@@ -175,22 +165,6 @@ export function DocumentsView() {
       {!visible.length && <div className="empty-state"><FileText size={25}/><b>No documents found</b><p>Try a different name or status.</p></div>}
     </section>
 
-    {selected && <div className="document-modal-backdrop">
-      <section className="document-modal" role="dialog" aria-modal="true" aria-labelledby="uploaded-document-title">
-        <header><div><p className="page-eyebrow">DOCUMENT DETAILS</p><h2 id="uploaded-document-title">{selected.name}</h2><p>{selected.file}</p></div><button className="icon-button" onClick={() => setSelected(null)} aria-label="Close document details"><X size={20}/></button></header>
-        <div className="document-summary"><div className="detail-file-icon"><FileText size={28}/></div><div><StatusPill status={selected.status}/><p>Processed and available in this RuleWise demo session.</p></div></div>
-        <div className="detail-facts">
-          <article><Calendar/><span>Uploaded<b>{selected.uploaded}</b></span></article>
-          <article><FileText/><span>Page count<b>{selected.pages} pages</b></span></article>
-          <article><Layers3/><span>Searchable chunks<b>{selected.chunks}</b></span></article>
-        </div>
-        <section className="document-preview" aria-label="PDF preview">
-          <div><p className="page-eyebrow">DOCUMENT PREVIEW</p><span>{selected.file}</span></div>
-          <iframe src={`${selected.previewUrl}#toolbar=1&navpanes=0`} title={`Preview of ${selected.name}`}/>
-        </section>
-        <footer><button className="secondary-button" onClick={() => setSelected(null)}>Close</button><a className="primary-button" href={selected.previewUrl} target="_blank" rel="noreferrer">Open original PDF <ExternalLink size={15}/></a></footer>
-      </section>
-    </div>}
   </main>;
 }
 

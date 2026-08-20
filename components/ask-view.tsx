@@ -32,7 +32,13 @@ export function AskView() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    void listStoredDocuments().then(setLocalDocuments).catch(() => setLocalDocuments([]));
+    const requestedDocument = new URLSearchParams(window.location.search).get("document");
+    void listStoredDocuments().then(items => {
+      setLocalDocuments(items);
+      if (requestedDocument && (items.some(document => document.id === requestedDocument) || documents.some(document => document.id === requestedDocument))) {
+        setScope(requestedDocument);
+      }
+    }).catch(() => setLocalDocuments([]));
   }, []);
 
   async function ask(value = question) {
