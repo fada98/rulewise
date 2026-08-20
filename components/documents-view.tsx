@@ -3,6 +3,7 @@ import Link from "./safe-link";
 import { FileText, Filter, MoreHorizontal, Search, Trash2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { documents as initialDocuments, type DocumentStatus } from "../lib/demo-data";
+import { extractPdfSummary } from "../lib/pdf/browser-extract";
 import { PageHeader } from "./page-header";
 import { StatusPill } from "./status-pill";
 
@@ -32,38 +33,26 @@ export function DocumentsView() {
 
     setUploading(true);
     setNotice(`Processing ${file.name}…`);
-    const form = new FormData();
-    form.set("file", file);
-
     try {
-      const response = await fetch("/api/demo/documents", { method: "POST", body: form });
-      const result = await response.json() as {
-        id?: string;
-        filename?: string;
-        originalName?: string;
-        pageCount?: number;
-        chunkCount?: number;
-        error?: string;
-      };
-      if (!response.ok || !result.id) throw new Error(result.error || "The PDF could not be uploaded.");
+      const result = await extractPdfSummary(file);
 
       const displayName = file.name.replace(/\.pdf$/i, "").replace(/[-_]+/g, " ").trim() || "Uploaded document";
       const size = file.size >= 1024 * 1024
         ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
         : `${Math.max(1, Math.round(file.size / 1024))} KB`;
       setDocs(current => [{
-        id: result.id!,
+        id: crypto.randomUUID(),
         name: displayName,
-        file: result.filename || file.name,
-        pages: result.pageCount || 0,
-        chunks: result.chunkCount || 0,
+        file: file.name,
+        pages: result.pageCount,
+        chunks: result.chunkCount,
         status: "Ready",
         uploaded: "Just now",
         size,
       }, ...current]);
       setNotice(`${file.name} was processed and added to this demo session.`);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "The PDF could not be uploaded.");
+      setNotice(error instanceof Error ? error.message : "This PDF could not be read. Try a text-based PDF.");
     } finally {
       setUploading(false);
     }
