@@ -17,6 +17,7 @@ export function DocumentsView() {
     status: DocumentStatus;
     uploaded: string;
     size: string;
+    previewUrl?: string;
   };
   const [docs, setDocs] = useState<DocumentRow[]>(initialDocuments);
   const [query, setQuery] = useState("");
@@ -49,6 +50,7 @@ export function DocumentsView() {
         status: "Ready",
         uploaded: "Just now",
         size,
+        previewUrl: URL.createObjectURL(file),
       }, ...current]);
       setNotice(`${file.name} was processed and added to this demo session.`);
     } catch (error) {
@@ -67,7 +69,7 @@ export function DocumentsView() {
       <div className="table-toolbar"><div className="search-field"><Search size={16}/><input aria-label="Search documents" placeholder="Search documents" value={query} onChange={e=>setQuery(e.target.value)}/></div><button className="filter-button"><Filter size={15}/> All statuses</button><span>{visible.length} documents</span></div>
       <div className="data-table" role="table" aria-label="Documents">
         <div className="table-head" role="row"><span>DOCUMENT</span><span>STATUS</span><span>PAGES</span><span>CHUNKS</span><span>UPLOADED</span><span><span className="sr-only">Actions</span></span></div>
-        {visible.map(doc=><div className="table-row" role="row" key={doc.id}><Link href={`/dashboard/documents/${doc.id}`} className="table-document"><span className="file-icon"><FileText size={18}/></span><span><b>{doc.name}</b><small>{doc.file} · {doc.size}</small></span></Link><span><StatusPill status={doc.status}/></span><span data-label="Pages">{doc.pages || "—"}</span><span data-label="Chunks">{doc.chunks || "—"}</span><span data-label="Uploaded">{doc.uploaded}</span><span className="row-actions"><button aria-label={`Delete ${doc.name}`} onClick={()=>setDocs(docs.filter(d=>d.id!==doc.id))}><Trash2 size={15}/></button><button aria-label={`More options for ${doc.name}`}><MoreHorizontal size={17}/></button></span></div>)}
+        {visible.map(doc=><div className="table-row" role="row" key={doc.id}><Link href={doc.previewUrl ?? `/dashboard/documents/${doc.id}`} className="table-document" target={doc.previewUrl ? "_blank" : undefined} rel={doc.previewUrl ? "noreferrer" : undefined}><span className="file-icon"><FileText size={18}/></span><span><b>{doc.name}</b><small>{doc.file} · {doc.size}</small></span></Link><span><StatusPill status={doc.status}/></span><span data-label="Pages">{doc.pages || "—"}</span><span data-label="Chunks">{doc.chunks || "—"}</span><span data-label="Uploaded">{doc.uploaded}</span><span className="row-actions"><button aria-label={`Delete ${doc.name}`} onClick={()=>setDocs(current=>{const removed=current.find(item=>item.id===doc.id);if(removed?.previewUrl)URL.revokeObjectURL(removed.previewUrl);return current.filter(item=>item.id!==doc.id)})}><Trash2 size={15}/></button><button aria-label={`More options for ${doc.name}`}><MoreHorizontal size={17}/></button></span></div>)}
       </div>
       {!visible.length && <div className="empty-state"><FileText size={25}/><b>No documents found</b><p>Try a different name or status.</p></div>}
     </section>
