@@ -12,8 +12,9 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { documents as initialDocuments, type DocumentStatus } from "../lib/demo-data";
+import { deleteStoredDocument, listStoredDocuments, saveStoredDocument } from "../lib/demo-document-store";
 import { extractPdfSummary } from "../lib/pdf/browser-extract";
 import { PageHeader } from "./page-header";
 import Link from "./safe-link";
@@ -44,6 +45,26 @@ export function DocumentsView() {
     `${document.name} ${document.status}`.toLowerCase().includes(query.toLowerCase()),
   );
 
+  useEffect(() => {
+    let active = true;
+    void listStoredDocuments().then(stored => {
+      if (!active) return;
+      const restored: DocumentRow[] = stored.map(document => ({
+        id: document.id,
+        name: document.name,
+        file: document.file,
+        pages: document.pages,
+        chunks: document.chunks,
+        status: "Ready",
+        uploaded: document.uploaded,
+        size: document.size,
+        previewUrl: URL.createObjectURL(document.blob),
+      }));
+      setDocs(current => [...restored, ...current.filter(document => !restored.some(item => item.id === document.id))]);
+    }).catch(() => setNotice("Saved local documents could not be restored."));
+    return () => { active = false; };
+  }, []);
+
   async function accept(file?: File) {
     if (!file) return;
     if (file.type !== "application/pdf") return setNotice("Only PDF documents are supported.");
@@ -72,6 +93,17 @@ export function DocumentsView() {
         size,
         previewUrl: URL.createObjectURL(file),
       };
+      await saveStoredDocument({
+        id: document.id,
+        name: document.name,
+        file: document.file,
+        pages: document.pages,
+        chunks: document.chunks,
+        uploaded: document.uploaded,
+        size: document.size,
+        blob: file,
+        textChunks: result.chunks,
+      });
       setDocs(current => [document, ...current]);
       setNotice(`${file.name} was processed and added to this demo session.`);
     } catch (error) {
@@ -92,6 +124,7 @@ export function DocumentsView() {
 
   function removeDocument(document: DocumentRow) {
     if (document.previewUrl) URL.revokeObjectURL(document.previewUrl);
+    if (document.previewUrl) void deleteStoredDocument(document.id);
     setDocs(current => current.filter(item => item.id !== document.id));
     setMenuId(null);
     setSelected(current => current?.id === document.id ? null : current);

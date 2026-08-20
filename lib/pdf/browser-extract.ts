@@ -31,7 +31,7 @@ export async function extractPdfSummary(file: File) {
 
     const chunks = chunkPages(pages);
     if (!chunks.length) throw new Error("No selectable text was found in this PDF.");
-    return { pageCount: pages.length, chunkCount: chunks.length };
+    return { pageCount: pages.length, chunkCount: chunks.length, chunks };
   } finally {
     if (typeof loadingTask.destroy === "function") {
       await loadingTask.destroy();
