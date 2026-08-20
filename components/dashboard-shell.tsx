@@ -1,8 +1,9 @@
 "use client";
 import Link from "./safe-link";
 import { usePathname } from "next/navigation";
-import { BarChart3, BookOpen, ChevronDown, FileText, HelpCircle, History, Menu, MessageSquareText, Settings, ShieldCheck, X } from "lucide-react";
+import { BarChart3, BookOpen, FileText, HelpCircle, History, LogOut, Menu, MessageSquareText, Settings, ShieldCheck, X } from "lucide-react";
 import { useState } from "react";
+import type { Account } from "../lib/account";
 import { Brand } from "./brand";
 
 const primary = [
@@ -17,7 +18,7 @@ const secondary = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({ children, account, signOutPath }: { children: React.ReactNode; account: Account; signOutPath: string }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const item = ({ href, label, icon: Icon }: (typeof primary)[number]) => {
@@ -29,7 +30,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <aside className={open ? "app-sidebar open" : "app-sidebar"}>
       <div className="sidebar-brand"><Brand/></div>
       <nav aria-label="Application navigation"><p className="nav-label">WORKSPACE</p>{primary.map(item)}<p className="nav-label nav-label-second">MANAGE</p>{secondary.map(item)}</nav>
-      <div className="sidebar-bottom"><button className="workspace-switcher"><span className="avatar">AS</span><span><b>Alex Smith</b><small>alex@rulewise.demo</small></span><ChevronDown size={15}/></button><a className="help-link" href="mailto:support@rulewise.app"><HelpCircle size={15}/> Help & documentation</a></div>
+      <div className="sidebar-bottom"><div className="workspace-switcher"><span className="avatar">{account.fullName.split(/\s+/).map(part => part[0]).join("").slice(0,2).toUpperCase()}</span><span><b>{account.fullName}</b><small>{account.email}</small></span><a className="account-signout" href={signOutPath} aria-label="Sign out"><LogOut size={15}/></a></div><a className="help-link" href="mailto:support@rulewise.app"><HelpCircle size={15}/> Help & documentation</a></div>
     </aside>
     {open && <button className="nav-backdrop" aria-label="Close navigation" onClick={() => setOpen(false)} />}
     <div className="app-content">{children}</div>
