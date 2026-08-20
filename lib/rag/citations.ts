@@ -1,0 +1,2 @@
+export type RetrievedChunk={id:string;documentId:string;documentName:string;pageNumber:number;content:string;similarity:number};
+export function mapCitations(chunks:RetrievedChunk[]){const seen=new Set<string>();return chunks.filter(chunk=>{const key=`${chunk.documentId}:${chunk.pageNumber}`;if(seen.has(key))return false;seen.add(key);return true}).map((chunk,index)=>({number:index+1,documentId:chunk.documentId,chunkId:chunk.id,documentName:chunk.documentName,pageNumber:chunk.pageNumber,similarityScore:chunk.similarity}))}

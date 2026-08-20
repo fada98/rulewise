@@ -1,0 +1,6 @@
+import Link from "next/link";
+import { ArrowRight, MessageSquare, Plus, Search, Trash2 } from "lucide-react";
+import { PageHeader } from "../../../components/page-header";
+import { recentQuestions } from "../../../lib/demo-data";
+export const metadata={title:"History"};
+export default function HistoryPage(){return <main className="dashboard-page"><PageHeader eyebrow="CONVERSATIONS" title="Question history" description="Reopen previous conversations and continue where you left off." actions={<Link href="/dashboard/ask" className="primary-button"><Plus size={16}/> New conversation</Link>}/><div className="history-search search-field"><Search size={16}/><input aria-label="Search conversations" placeholder="Search questions and answers"/></div><section className="panel history-list">{recentQuestions.concat(recentQuestions.slice(0,2).map(q=>({...q,time:"Aug 14"}))).map((item,i)=><article className="history-row" key={`${item.question}-${i}`}><span className="history-icon"><MessageSquare size={17}/></span><div><Link href="/dashboard/ask">{item.question}</Link><p>{item.answer}</p><small>{item.time} · {item.sources} cited sources</small></div><button aria-label="Delete conversation"><Trash2 size={15}/></button><Link href="/dashboard/ask" aria-label="Open conversation"><ArrowRight size={16}/></Link></article>)}</section></main>}
