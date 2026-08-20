@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/safe-link";
 import { ArrowLeft } from "lucide-react";
 import { Brand } from "../../components/brand";
 export const metadata={title:"Sign in"};

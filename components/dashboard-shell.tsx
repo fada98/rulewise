@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "./safe-link";
 import { usePathname } from "next/navigation";
 import { BarChart3, BookOpen, ChevronDown, FileText, HelpCircle, History, Menu, MessageSquareText, Settings, ShieldCheck, X } from "lucide-react";
 import { useState } from "react";

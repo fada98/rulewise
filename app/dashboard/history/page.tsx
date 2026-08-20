@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/safe-link";
 import { ArrowRight, MessageSquare, Plus, Search, Trash2 } from "lucide-react";
 import { PageHeader } from "../../../components/page-header";
 import { recentQuestions } from "../../../lib/demo-data";

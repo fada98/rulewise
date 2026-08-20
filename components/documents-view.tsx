@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "./safe-link";
 import { FileText, Filter, MoreHorizontal, Search, Trash2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { documents as initialDocuments } from "../lib/demo-data";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/safe-link";
 import { ArrowRight, CircleAlert, FileText, MessageSquareText, MoreHorizontal, Plus, ThumbsUp } from "lucide-react";
 import { PageHeader } from "../../components/page-header";
 import { StatusPill } from "../../components/status-pill";
