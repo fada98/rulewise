@@ -1,7 +1,8 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "RuleWise | Answers Grounded in Your Documents",
+export const metadata: Metadata = {
+  title: { absolute: "RuleWise | Answers Grounded in Your Documents" },
   description: "Upload rulebooks, policies, manuals and procedures. Ask questions and receive evidence-based answers with clear source citations.",
 };
 
