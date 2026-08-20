@@ -12,10 +12,11 @@ export async function extractPdfSummary(file: File) {
   };
   pdfjsGlobal.pdfjsWorker ??= { WorkerMessageHandler };
 
-  const pdf = await getDocument({
+  const loadingTask = getDocument({
     data: new Uint8Array(await file.arrayBuffer()),
     useSystemFonts: true,
-  }).promise;
+  });
+  const pdf = await loadingTask.promise;
   const pages = [];
 
   try {
@@ -32,6 +33,8 @@ export async function extractPdfSummary(file: File) {
     if (!chunks.length) throw new Error("No selectable text was found in this PDF.");
     return { pageCount: pages.length, chunkCount: chunks.length };
   } finally {
-    await pdf.destroy();
+    if (typeof loadingTask.destroy === "function") {
+      await loadingTask.destroy();
+    }
   }
 }
