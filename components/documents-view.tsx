@@ -184,6 +184,10 @@ export function DocumentsView() {
           <article><FileText/><span>Page count<b>{selected.pages} pages</b></span></article>
           <article><Layers3/><span>Searchable chunks<b>{selected.chunks}</b></span></article>
         </div>
+        <section className="document-preview" aria-label="PDF preview">
+          <div><p className="page-eyebrow">DOCUMENT PREVIEW</p><span>{selected.file}</span></div>
+          <iframe src={`${selected.previewUrl}#toolbar=1&navpanes=0`} title={`Preview of ${selected.name}`}/>
+        </section>
         <footer><button className="secondary-button" onClick={() => setSelected(null)}>Close</button><a className="primary-button" href={selected.previewUrl} target="_blank" rel="noreferrer">Open original PDF <ExternalLink size={15}/></a></footer>
       </section>
     </div>}
