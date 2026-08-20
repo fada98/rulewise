@@ -2,27 +2,76 @@
 import Link from "./safe-link";
 import { FileText, Filter, MoreHorizontal, Search, Trash2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { documents as initialDocuments } from "../lib/demo-data";
+import { documents as initialDocuments, type DocumentStatus } from "../lib/demo-data";
 import { PageHeader } from "./page-header";
 import { StatusPill } from "./status-pill";
 
 export function DocumentsView() {
-  const [docs, setDocs] = useState(initialDocuments);
+  type DocumentRow = {
+    id: string;
+    name: string;
+    file: string;
+    pages: number;
+    chunks: number;
+    status: DocumentStatus;
+    uploaded: string;
+    size: string;
+  };
+  const [docs, setDocs] = useState<DocumentRow[]>(initialDocuments);
   const [query, setQuery] = useState("");
   const [dragging, setDragging] = useState(false);
   const [notice, setNotice] = useState("");
+  const [uploading, setUploading] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const visible = docs.filter(d => `${d.name} ${d.status}`.toLowerCase().includes(query.toLowerCase()));
-  function accept(file?: File) {
+  async function accept(file?: File) {
     if (!file) return;
     if (file.type !== "application/pdf") return setNotice("Only PDF documents are supported.");
     if (file.size > 20 * 1024 * 1024) return setNotice("This PDF exceeds the 20 MB upload limit.");
-    setNotice(`${file.name} is ready to upload when Supabase is connected.`);
+    if (!file.size) return setNotice("The selected PDF is empty.");
+
+    setUploading(true);
+    setNotice(`Processing ${file.name}…`);
+    const form = new FormData();
+    form.set("file", file);
+
+    try {
+      const response = await fetch("/api/demo/documents", { method: "POST", body: form });
+      const result = await response.json() as {
+        id?: string;
+        filename?: string;
+        originalName?: string;
+        pageCount?: number;
+        chunkCount?: number;
+        error?: string;
+      };
+      if (!response.ok || !result.id) throw new Error(result.error || "The PDF could not be uploaded.");
+
+      const displayName = file.name.replace(/\.pdf$/i, "").replace(/[-_]+/g, " ").trim() || "Uploaded document";
+      const size = file.size >= 1024 * 1024
+        ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+        : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+      setDocs(current => [{
+        id: result.id!,
+        name: displayName,
+        file: result.filename || file.name,
+        pages: result.pageCount || 0,
+        chunks: result.chunkCount || 0,
+        status: "Ready",
+        uploaded: "Just now",
+        size,
+      }, ...current]);
+      setNotice(`${file.name} was processed and added to this demo session.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "The PDF could not be uploaded.");
+    } finally {
+      setUploading(false);
+    }
   }
   return <main className="dashboard-page">
-    <PageHeader eyebrow="KNOWLEDGE BASE" title="Documents" description="Upload and manage the source material RuleWise can search." actions={<button className="primary-button" onClick={()=>input.current?.click()}><Upload size={16}/> Upload PDF</button>}/>
-    <section className={dragging ? "upload-zone dragging" : "upload-zone"} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);accept(e.dataTransfer.files[0])}}>
-      <input ref={input} type="file" accept="application/pdf" hidden onChange={e=>accept(e.target.files?.[0])}/><span className="upload-icon"><Upload size={21}/></span><div><b>Drop a PDF here, or <button onClick={()=>input.current?.click()}>browse files</button></b><p>PDF only · Maximum file size 20 MB · <a href="/demo/fictional-competition-rules.pdf" target="_blank">Download demo rulebook</a></p></div>
+    <PageHeader eyebrow="KNOWLEDGE BASE" title="Documents" description="Upload and manage the source material RuleWise can search." actions={<button className="primary-button" disabled={uploading} onClick={()=>input.current?.click()}><Upload size={16}/> {uploading ? "Processing…" : "Upload PDF"}</button>}/>
+    <section className={dragging ? "upload-zone dragging" : "upload-zone"} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);void accept(e.dataTransfer.files[0])}} aria-busy={uploading}>
+      <input ref={input} type="file" accept="application/pdf" hidden onChange={e=>{const file=e.target.files?.[0];e.target.value="";void accept(file)}}/><span className="upload-icon"><Upload size={21}/></span><div><b>Drop a PDF here, or <button disabled={uploading} onClick={()=>input.current?.click()}>browse files</button></b><p>PDF only · Maximum file size 20 MB · <a href="/demo/fictional-competition-rules.pdf" target="_blank">Download demo rulebook</a></p></div>
     </section>
     {notice && <div className="notice" role="status"><span>{notice}</span><button onClick={()=>setNotice("")} aria-label="Dismiss"><X size={16}/></button></div>}
     <section className="panel document-table-panel">
