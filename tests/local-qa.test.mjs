@@ -29,3 +29,19 @@ test("returns insufficient evidence for unrelated questions", async () => {
   assert.equal(result.noAnswer, true);
   assert.deepEqual(result.sources, []);
 });
+
+test("keeps a complete source title when punctuation splits it into sentences", async () => {
+  const sourceDocument = {
+    ...document,
+    name: "ЛР6 схеми контролю",
+    textChunks: [{
+      pageNumber: 7,
+      chunkIndex: 0,
+      content: "9. Джерело Методичні вказівки до лабораторної роботи № 6 «Дослідження схем. Схеми контролю», наданий файл «лр6_схеми контролю.docx».",
+    }],
+  };
+  const result = await answerStoredDocuments("Яке використано джерело?", [sourceDocument]);
+  assert.equal(result.noAnswer, false);
+  assert.match(result.answer, /Схеми контролю»/u);
+  assert.match(result.answer, /лр6_схеми контролю\.docx/u);
+});

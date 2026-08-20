@@ -51,14 +51,26 @@ function lexicalScore(question: string, chunk: TextChunk) {
 
 function sentences(value: string) {
   const matches = value.replace(/\s+/g, " ").trim().match(/[^.!?\n]+(?:[.!?]+|$)/g);
-  return (matches ?? [value]).map(sentence => sentence.trim()).filter(sentence => sentence.length >= 18);
+  return (matches ?? [value]).map(sentence => sentence.trim()).filter(Boolean);
 }
 
 function bestPassage(question: string, content: string) {
   const query = [...new Set(tokens(question))];
   const options = sentences(content).map((sentence, index, all) => {
     const score = overlapScore(query, sentence);
-    const answer = score > 0 && sentence.length < 70 && all[index + 1] ? `${sentence} ${all[index + 1]}` : sentence;
+    let answer = sentence;
+    for (let offset = 1; offset <= 4; offset += 1) {
+      const next = all[index + offset];
+      if (!next || /^\d+(?:\.\d+)*\.\s/u.test(next)) break;
+      const fileExtension = /«[^»]*[_/\\][^»]*\.$/u.test(answer) && /^[\p{L}\p{N}]{1,8}[»"')\]]*[.!?]?$/u.test(next);
+      const separator = fileExtension ? "" : " ";
+      const combinedLength = answer.length + next.length + separator.length;
+      if (combinedLength > 460) break;
+      answer += `${separator}${next}`;
+      const openQuotes = (answer.match(/«/g) ?? []).length;
+      const closeQuotes = (answer.match(/»/g) ?? []).length;
+      if (answer.length >= 220 && openQuotes === closeQuotes && /[.!?]$/u.test(answer)) break;
+    }
     return { answer, score };
   }).sort((left, right) => right.score - left.score || left.answer.length - right.answer.length);
   return options[0] ?? { answer: content.slice(0, 420), score: 0 };
