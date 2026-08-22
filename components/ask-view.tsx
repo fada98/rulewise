@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { documents, retrievedSources } from "../lib/demo-data";
 import { listStoredDocuments, type StoredDocument } from "../lib/demo-document-store";
 import { answerStoredDocuments, type GroundedSource } from "../lib/local-qa";
+import { saveHistory } from "../lib/history-store";
 import { PageHeader } from "./page-header";
 
 type Message = {
@@ -59,22 +60,26 @@ export function AskView() {
 
       if (shouldUseLocalModel) {
         const result = await answerStoredDocuments(currentQuestion, selectedLocalDocuments, setLoadingMessage);
-        setMessages(current => [...current, {
+        const message = {
           question: currentQuestion,
           answer: result.answer,
           noAnswer: result.noAnswer,
           sources: result.sources,
-        }]);
+        };
+        setMessages(current => [...current, message]);
+        void saveHistory(message.question, message.answer, message.sources).catch(error => console.error("History could not be saved", error));
       } else {
         const unknown = /parking|weather|salary/i.test(currentQuestion);
-        setMessages(current => [...current, {
+        const message = {
           question: currentQuestion,
           answer: unknown
             ? "I couldn’t find enough information in the selected documents to answer this reliably."
             : "No. The player taking the restart may not touch the ball again until another player has touched it.",
           noAnswer: unknown,
           sources: unknown ? [] : retrievedSources,
-        }]);
+        };
+        setMessages(current => [...current, message]);
+        void saveHistory(message.question, message.answer, message.sources).catch(error => console.error("History could not be saved", error));
       }
     } catch (error) {
       console.error("Local question answering failed", error);
@@ -106,7 +111,7 @@ export function AskView() {
     />
     <div className="ask-layout">
       <section className="chat-surface">
-        <div className="scope-bar"><span>SEARCHING</span><label><BookOpen size={16}/><select value={scope} onChange={event => setScope(event.target.value)} aria-label="Documents to search"><option value="all">All ready documents</option>{localDocuments.length > 0 && <optgroup label="Uploaded on this device">{localDocuments.map(document => <option key={document.id} value={document.id}>{document.name}</option>)}</optgroup>}<optgroup label="Demo documents">{documents.filter(document => document.status === "Ready").map(document => <option key={document.id} value={document.id}>{document.name}</option>)}</optgroup></select><ChevronDown size={14}/></label><small>{scopeSummary}</small></div>
+        <div className="scope-bar"><span>SEARCHING</span><label><BookOpen size={16}/><select value={scope} onChange={event => setScope(event.target.value)} aria-label="Documents to search"><option value="all">All ready documents</option>{localDocuments.length > 0 && <optgroup label="Your private uploads">{localDocuments.map(document => <option key={document.id} value={document.id}>{document.name}</option>)}</optgroup>}<optgroup label="Demo documents">{documents.filter(document => document.status === "Ready").map(document => <option key={document.id} value={document.id}>{document.name}</option>)}</optgroup></select><ChevronDown size={14}/></label><small>{scopeSummary}</small></div>
         {!messages.length && !loading
           ? <div className="ask-empty"><span className="ask-empty-icon"><BookOpen/></span><h2>What would you like to verify?</h2><p>{localDocuments.length ? "Your uploaded PDFs are ready for private, on-device question answering." : "Upload a PDF to search and ask questions without an API key."}</p><div className="example-questions">{examples.map(example => <button key={example} onClick={() => void ask(example)}>{example}<span>→</span></button>)}</div></div>
           : <div className="conversation">

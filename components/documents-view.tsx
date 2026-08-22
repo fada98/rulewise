@@ -58,7 +58,7 @@ export function DocumentsView() {
         previewUrl: URL.createObjectURL(document.blob),
       }));
       setDocs(current => [...restored, ...current.filter(document => !restored.some(item => item.id === document.id))]);
-    }).catch(() => setNotice("Saved local documents could not be restored."));
+    }).catch(() => setNotice("Your saved documents could not be loaded. Make sure the Supabase database setup has been completed."));
     return () => { active = false; };
   }, []);
 
@@ -102,7 +102,7 @@ export function DocumentsView() {
         textChunks: result.chunks,
       });
       setDocs(current => [document, ...current]);
-      setNotice(`${file.name} was processed and added to this demo session.`);
+      setNotice(`${file.name} was processed and saved to your private account.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "This PDF could not be read. Try a text-based PDF.");
     } finally {

@@ -50,7 +50,7 @@ export function DocumentDetailsView({ id }: { id: string }) {
     <Link href="/dashboard/documents" className="back-link"><ArrowLeft size={15}/> Back to documents</Link>
     <PageHeader eyebrow="DOCUMENT DETAILS" title={document.name} description={document.file} actions={<Link href={askUrl} className="primary-button"><MessageSquareText size={16}/> Ask this document</Link>}/>
     <div className="detail-grid">
-      <section className="document-summary"><div className="detail-file-icon"><FileText size={28}/></div><div><StatusPill status={document.status}/><p>{stored ? "Indexed locally and ready for private questions in this browser." : "Indexed and available for questions across your workspace."}</p></div></section>
+      <section className="document-summary"><div className="detail-file-icon"><FileText size={28}/></div><div><StatusPill status={document.status}/><p>{stored ? "Saved to your private account and ready for questions." : "Indexed and available for questions across your workspace."}</p></div></section>
       <section className="detail-facts"><article><Calendar/><span>Uploaded<b>{document.uploaded}</b></span></article><article><FileText/><span>Page count<b>{document.pages} pages</b></span></article><article><Layers3/><span>Searchable chunks<b>{document.chunks}</b></span></article></section>
     </div>
     {stored && previewUrl && <section className="document-preview detail-pdf-preview" aria-label="PDF preview"><div><p className="page-eyebrow">DOCUMENT PREVIEW</p><span>{stored.file}</span></div><iframe src={`${previewUrl}#toolbar=1&navpanes=0`} title={`Preview of ${stored.name}`}/></section>}
