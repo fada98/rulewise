@@ -40,6 +40,13 @@ create index if not exists idx_documents_user_created on public.documents(user_i
 create index if not exists idx_document_chunks_document on public.document_chunks(document_id, chunk_index);
 create index if not exists idx_question_history_user_created on public.question_history(user_id, created_at desc);
 
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.profiles to authenticated;
+grant select, insert, update, delete on public.documents to authenticated;
+grant select, insert, update, delete on public.document_chunks to authenticated;
+grant select, insert, update, delete on public.question_history to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+
 alter table public.profiles enable row level security;
 alter table public.documents enable row level security;
 alter table public.document_chunks enable row level security;
@@ -73,7 +80,6 @@ begin
 end;
 $$;
 
-drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
 for each row execute procedure public.handle_new_user();
