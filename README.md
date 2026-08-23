@@ -146,3 +146,7 @@ No private documents or production account data are included.
 ## Portfolio Note
 
 RuleWise demonstrates full-stack development, document ingestion, semantic search, retrieval-augmented generation, source-grounded answers, citation handling, API integration, database design, authenticated data ownership, evaluation and debug tooling, and responsive UI.
+
+## Author
+
+[fada98](https://github.com/fada98)
