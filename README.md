@@ -1,21 +1,19 @@
 # RuleWise
 
-RuleWise is a document-grounded knowledge assistant that allows users to upload PDF documents, index them, ask questions, and receive evidence-based answers with source citations.
+RuleWise is a document-grounded knowledge assistant for PDFs, policies, manuals, and rulebooks. Users can upload documents, ask questions, and receive evidence-based answers with source citations.
 
 ## Features
 
-- PDF upload with file type and size validation
-- Page-aware text extraction, chunking, and document processing states
-- OpenAI embeddings and semantic retrieval
-- PostgreSQL vector search with pgvector
-- Document-grounded question answering with evidence thresholds
-- Source citations with document, page, passage, and similarity metadata
-- Per-user documents and conversation history
-- Helpful / Incorrect feedback workflow
-- Evaluation view for retrieved chunks and relevance scores
-- Supabase authentication, private Storage, PostgreSQL, and row-level security
+- PDF ingestion with file validation and document processing states
+- Page-aware text extraction and overlapping chunk generation
+- OpenAI embeddings with PostgreSQL and pgvector retrieval
+- Source-grounded answers with configurable evidence thresholds
+- Citations containing document, page, passage, and similarity metadata
+- Per-user documents, conversation history, and Helpful / Incorrect feedback
+- Evaluation and debug views for retrieved chunks and relevance scores
+- Supabase authentication, private Storage, and row-level security
 - Responsive landing page and authenticated workspace
-- Explicit loading, empty, validation, insufficient-evidence, and failure states
+- Loading, empty, validation, insufficient-evidence, and failure states
 
 ## Screenshots
 
@@ -49,7 +47,6 @@ The repository includes a concise end-to-end product walkthrough at [`portfolio/
 
 ## Tech Stack
 
-- Vinext with Next.js-compatible routing and server handlers
 - React 19 and TypeScript
 - Tailwind CSS 4
 - Supabase Auth and private Storage
@@ -57,6 +54,7 @@ The repository includes a concise end-to-end product walkthrough at [`portfolio/
 - OpenAI Responses and Embeddings APIs
 - PDF.js for browser-side PDF text extraction
 - Zod for request validation
+- Vinext for Next.js-compatible routing, server handlers, and builds
 - Lucide React icons
 - Node.js test runner and ESLint
 
@@ -64,18 +62,22 @@ The repository includes a concise end-to-end product walkthrough at [`portfolio/
 
 ```text
 PDF upload
-  → page-aware text extraction
-  → overlapping chunks
-  → OpenAI embeddings
-  → pgvector storage
-  → similarity search scoped to the authenticated user
-  → grounded answer generation
-  → document and page citations
+  → text extraction
+  → chunking
+  → embeddings
+  → pgvector
+  → similarity search
+  → grounded answer
+  → citations
 ```
 
-RuleWise keeps citation metadata outside the generated answer. The retrieval function enforces both ownership and a similarity threshold before evidence reaches the answer model. Uploaded files are stored in a private Supabase bucket and all user-owned tables use row-level security.
+Text is extracted per page and split into overlapping chunks before embeddings are stored in pgvector. Similarity search is scoped to the authenticated user and applies an evidence threshold before retrieved passages reach the answer model.
 
-The interface also contains a browser-side retrieval path for reviewing uploaded PDFs without invoking the hosted answer endpoint. This keeps the portfolio workflow usable while the complete Supabase and OpenAI environment is being configured.
+Citation metadata is stored separately from generated text so each answer can retain its document, page, passage, and similarity references. Uploaded files remain in a private Supabase bucket, and row-level security protects all user-owned records.
+
+### Demo Mode
+
+Browser-side retrieval provides a local review path for uploaded PDFs without invoking the hosted answer endpoint. It keeps the portfolio and demo workflow usable without requiring the complete Supabase and OpenAI environment.
 
 ## Getting Started
 
@@ -143,4 +145,4 @@ No private documents or production account data are included.
 
 ## Portfolio Note
 
-RuleWise demonstrates full-stack development, authenticated data ownership, PDF ingestion, semantic search, retrieval-augmented generation, API integration, database design, evaluation tooling, and responsive product UI.
+RuleWise demonstrates full-stack development, document ingestion, semantic search, retrieval-augmented generation, source-grounded answers, citation handling, API integration, database design, authenticated data ownership, evaluation and debug tooling, and responsive UI.
