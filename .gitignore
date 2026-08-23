@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+*.trace.zip
 
 # next.js
 /.next/
@@ -21,6 +24,9 @@
 # misc
 .DS_Store
 *.pem
+.idea/
+*.tsbuildinfo
+.eslintcache
 
 # debug
 npm-debug.log*
@@ -30,6 +36,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +46,9 @@ yarn-error.log*
 /outputs/
 /work/
 /tmp/
+
+# local portfolio capture intermediates
+/portfolio/page@*.webm
+/portfolio/*-canvas.webm
+/portfolio/*-verified.webm
+/portfolio/*-remux.webm

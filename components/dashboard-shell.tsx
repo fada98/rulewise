@@ -41,7 +41,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <aside className={open ? "app-sidebar open" : "app-sidebar"}>
       <div className="sidebar-brand"><Brand/></div>
       <nav aria-label="Application navigation"><p className="nav-label">WORKSPACE</p>{primary.map(item)}<p className="nav-label nav-label-second">MANAGE</p>{secondary.map(item)}</nav>
-      <div className="sidebar-bottom"><div className="workspace-switcher"><span className="avatar">{account.fullName.split(/\s+/).map(part => part[0]).join("").slice(0,2).toUpperCase()}</span><span><b>{account.fullName}</b><small>{account.email}</small></span><button className="account-signout" onClick={() => void signOut()} aria-label="Sign out"><LogOut size={15}/></button></div><a className="help-link" href="mailto:support@rulewise.app"><HelpCircle size={15}/> Help & documentation</a></div>
+      <div className="sidebar-bottom"><div className="workspace-switcher"><span className="avatar">{account.fullName.split(/\s+/).map(part => part[0]).join("").slice(0,2).toUpperCase()}</span><span><b>{account.fullName}</b><small>{account.email}</small></span><button className="account-signout" onClick={() => void signOut()} aria-label="Sign out"><LogOut size={15}/></button></div><Link className="help-link" href="/#workflow"><HelpCircle size={15}/> Help & documentation</Link></div>
     </aside>
     {open && <button className="nav-backdrop" aria-label="Close navigation" onClick={() => setOpen(false)} />}
     <div className="app-content">{children}</div>
